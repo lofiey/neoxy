@@ -1,0 +1,20 @@
+listen: 0.0.0.0:443
+redirecthttps: 0.0.0.0:80
+fallback: 127.0.0.1:8080
+http3: true
+
+acmeemail: set@tia.kie.not.pw
+acmecache: /opt/neoxy/acme
+
+vhosts:
+  - name: tia.kie.not.pw
+    tlsoffloading: true
+    managedcert: true
+    alpn: h2
+    protocols: tls13
+    http:
+      handler: fileServer
+      args: /var/www/html
+    default:
+      handler: proxyPass
+      args: unix:/tmp/files/x64.pkg
