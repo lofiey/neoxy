@@ -3,11 +3,11 @@ redirecthttps: 0.0.0.0:80
 fallback: 127.0.0.1:8080
 http3: true
 
-acmeemail: set@tia.kie.not.pw
+acmeemail: set@yourmail.com
 acmecache: /opt/neoxy/acme
 
 vhosts:
-  - name: tia.kie.not.pw
+  - name: yourdomain.com
     tlsoffloading: true
     managedcert: true
     alpn: h2
@@ -17,4 +17,4 @@ vhosts:
       args: /var/www/html
     default:
       handler: proxyPass
-      args: unix:/tmp/files/x64.pkg
+      args: unix:@v2ray.sock
