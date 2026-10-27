@@ -29,12 +29,6 @@ sudo bash install.sh uninstall        # 卸载（保留配置）
 sudo bash install.sh uninstall --purge
 ```
 
-> 从旧版 `tls-shunt-proxy` 升级：脚本会自动停掉旧服务，把 `/etc/tls-shunt-proxy/config.yaml` 和证书缓存迁移到 `/opt/neoxy`，旧目录不会被删除。
-
-编译用的 Rust 工具链和 target 目录都放在 `/opt/neoxy/` 下，编译完成后自动删除（`KEEP_RUST=1 bash install.sh` 可保留工具链）。
-
-手动运行：`neoxy -config /opt/neoxy/config.yaml`
-
 ## 功能
 
 | 功能 | 状态 |
