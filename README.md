@@ -1,6 +1,6 @@
 # neoxy
 
-按 SNI / 协议特征分流 TLS 流量的代理，用 Rust 编写，**配置格式兼容 [tls-shunt-proxy](https://github.com/liberal-boy/tls-shunt-proxy)**，并新增 HTTP/3 (QUIC)。
+按 SNI / 协议特征分流 TLS 流量的代理，用 Rust 编写并新增 HTTP/3 (QUIC)。
 
 ## 一键安装（安装到 /opt/neoxy）
 
