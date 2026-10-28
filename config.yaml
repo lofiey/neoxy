@@ -1,20 +1,74 @@
+# listen: 监听地址（TCP 和 UDP/QUIC 共用同一个端口）
 listen: 0.0.0.0:443
+
+# redirecthttps: 监听一个地址，发送到这个地址的 http 请求将被重定向到 https
 redirecthttps: 0.0.0.0:80
-fallback: 127.0.0.1:8080
+
+# inboundbuffersize: 客户端→后端 缓冲区大小，单位 KB, 默认值 32
+inboundbuffersize: 32
+
+# outboundbuffersize: 后端→客户端 缓冲区大小，单位 KB, 默认值 64
+outboundbuffersize: 64
+
+# 无法识别 sni 或 sni 不在 vhost 中的请求回落地址，同 proxyPass 参数格式
+fallback: 127.0.0.1:8443
+
+# ───── 以下为新增项 ─────
+# http3: 开启 HTTP/3 (QUIC)，仅对 tlsoffloading: true 的 vhost 生效。
+# 开启后 TCP 侧的 HTTP 响应会自动附带 Alt-Svc 头，通知浏览器改用 h3。
 http3: true
 
-acmeemail: set@yourmail.com
-acmecache: /opt/neoxy/acme
+# ACME（managedcert）相关：联系邮箱、证书缓存目录、是否使用 Let's Encrypt 测试环境
+acmeemail: admin@example.com
+acmecache: ./acme-cache
+acmestaging: false
 
 vhosts:
-  - name: yourdomain.com
+  - name: vmess.example.com
     tlsoffloading: true
-    managedcert: true
-    alpn: h2
-    protocols: tls13
+    managedcert: false
+    keytype: p256            # 仅 p256 生效（rustls-acme 只签发 ECDSA P-256）
+    cert: /etc/ssl/vmess.example.com.pem
+    key: /etc/ssl/vmess.example.com.key
+    alpn: h2,http/1.1
+    protocols: tls12,tls13
+
     http:
+      paths:
+        - path: /vmess/ws/
+          handler: proxyPass
+          args: 127.0.0.1:40000
+        - path: "*"            # h2 / h3 请求的 path 被识别为 *
+          handler: proxyPass
+          args: 127.0.0.1:40003
+        - path: /static/
+          trimprefix: /static
+          handler: fileServer
+          args: /var/www/static
       handler: fileServer
       args: /var/www/html
+
+    # http2 非空时，h2 / h3 请求只按这里匹配，http.paths 中的 "*" 无效
+    # http2:
+    #   - path: /
+    #     handler: fileServer
+    #     args: /var/www/html
+    #   - path: /vmess
+    #     handler: proxyPass
+    #     args: h2c://localhost:40002
+
+    trojan:
+      handler: proxyPass
+      args: 127.0.0.1:4430
+
     default:
       handler: proxyPass
-      args: unix:@v2ray.sock
+      args: 127.0.0.1:40001
+      # args: 127.0.0.1:40001;proxyProtocol
+      # args: unix:/path/to/ds/file
+
+  - name: trojan.example.com
+    tlsoffloading: false
+    default:
+      handler: proxyPass
+      args: 127.0.0.1:8443
